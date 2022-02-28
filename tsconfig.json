@@ -1,0 +1,11 @@
+{
+  "include": ["src/*.ts"],
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "amd",
+    "target": "es5",
+    "sourceMap": true,
+    "lib": ["dom", "es2015", "es5", "es6"],
+    "isolatedModules": true
+  }
+}
