@@ -1,36 +1,41 @@
 body {
   box-sizing: border-box;
   color: green;
-  font-size: 28px;
+  font-size: 4rem;
+  font-family: "MS Gothic";
 }
 #chess-board {
-  width: calc(48px * 8 + 8px);
-  height: calc(48px * 8 + 8px);
+  width: calc(96px * 8);
+  height: calc(96px * 8);
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  border: 1px solid black;
+}
+
+.tile-color-white {
+  background: rgb(128, 184, 123);
+}
+.tile-color-black {
+  background: rgb(101, 127, 246);
 }
 .chess-tile {
   user-select: none;
   cursor: pointer;
-  width: 48px;
-  height: 48px;
-  border-top: 0px;
-  border-right: 1px;
-  border-bottom: 1px;
-  border-left: 0px;
+  width: 96px;
+  height: 96px;
+  border: 2px;
   border-style: solid;
   border-color: black;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 .even {
   background: rgb(144, 243, 144);
 }
 .on {
-  background: red;
+  background: rgb(173, 77, 77);
 }
 .row {
   display: flex;

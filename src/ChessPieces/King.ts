@@ -3,23 +3,26 @@ import { ChessTile } from "../ChessTile";
 import { ChessPiece } from "./ChessPiece";
 
 export default class King extends ChessPiece {
-  type = () => this.color=="black" ?  "♚" : "♔";
+  pieceSymbol = () => this.color=="black" ?  "♚" : "♔";
   
   hasMoved:boolean;
 
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {
     const validPositions:Array<{x:number, y:number}> = []
 
-    const myPos = this.getPosition();
+    const {myPos, direction} = this;
 
-    let tileOneAbove = boardState.getTileAtPosition(myPos.x, myPos.y+this.getDirection())
-    let tileOneBelow = boardState.getTileAtPosition(myPos.x, myPos.y-this.getDirection())
+    // Cardinal positions
+    let tileOneAbove = boardState.getTileAtPosition(myPos.x, myPos.y+direction)
+    let tileOneBelow = boardState.getTileAtPosition(myPos.x, myPos.y-direction)
     let tileOneLeft = boardState.getTileAtPosition(myPos.x-1, myPos.y)
     let tileOneRight = boardState.getTileAtPosition(myPos.x+1, myPos.y)
-    let tileTL = boardState.getTileAtPosition(myPos.x+this.getDirection(), myPos.y+this.getDirection())
-    let tileBL = boardState.getTileAtPosition(myPos.x+this.getDirection(), myPos.y-this.getDirection())
-    let tileTR = boardState.getTileAtPosition(myPos.x-this.getDirection(), myPos.y+this.getDirection())
-    let tileBR = boardState.getTileAtPosition(myPos.x-this.getDirection(), myPos.y-this.getDirection())
+
+    // Diaganol moves
+    let tileTL = boardState.getTileAtPosition(myPos.x+direction, myPos.y+direction)
+    let tileBL = boardState.getTileAtPosition(myPos.x+direction, myPos.y-direction)
+    let tileTR = boardState.getTileAtPosition(myPos.x-direction, myPos.y+direction)
+    let tileBR = boardState.getTileAtPosition(myPos.x-direction, myPos.y-direction)
 
     const addTilePositionIfValid = (tile:ChessTile) => {
       if(tile && (!tile.currentPiece || (tile.currentPiece && tile.currentPiece.color!=this.color))) {

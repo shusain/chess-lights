@@ -13,7 +13,7 @@ export class ChessTile {
     currentPiece:ChessPiece|null;
 
     get tileBaseColor () {
-        return (this.id+(this.y%2))%2==0 ? "green" : "blue"
+        return (this.id+(this.y%2))%2==0 ? "black" : "white"
     }
 
     constructor(id, x, y, public isOn=false, public hue=0, public saturation=100, public brightness=50) {

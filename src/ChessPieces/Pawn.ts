@@ -3,23 +3,17 @@ import { ChessTile } from "../ChessTile";
 import { ChessPiece } from "./ChessPiece";
 
 export default class Pawn extends ChessPiece {
-  type = () => this.color=="black" ?  "♟︎" : "♙";
+  pieceSymbol = () => this.color=="black" ?  "♟︎" : "♙";
   
   public hasMoved:boolean;
 
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {
     const validPositions:Array<{x:number, y:number}> = []
-    let myPos = {
-      x: this.currentTile.x,
-      y: this.currentTile.y
-    }
+    const {myPos, direction} = this
 
-    let direction = this.color == "white" ? 1 : -1
-
-    let tileTL = boardState.getTileAtPosition(myPos.x+this.getDirection(), myPos.y+this.getDirection())
-    let tileTR = boardState.getTileAtPosition(myPos.x-this.getDirection(), myPos.y+this.getDirection())
+    let tileTL = boardState.getTileAtPosition(myPos.x+direction, myPos.y+direction)
+    let tileTR = boardState.getTileAtPosition(myPos.x-direction, myPos.y+direction)
     
-
     const addTilePositionIfValid = (tile:ChessTile) => {
       if(tile && (tile.currentPiece && tile.currentPiece.color!=this.color)) {
         validPositions.push({x:tile.x,y:tile.y})

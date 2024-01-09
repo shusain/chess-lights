@@ -40,14 +40,8 @@ export class ChessLightsMain {
         this.chessBoard.flatTileList.forEach(tile => {
 
             let curTileElm = document.getElementById(`tile-${tile.id}`)
-            const evenOrOddTile = (tile.id+1) % 2 == 0 ? 'even':'odd'
             const onOrOffTile = tile.isOn ? 'on':'off'
-            curTileElm.className = `chess-tile ${onOrOffTile} ${evenOrOddTile}`
-            if(tile.isOn) {
-                curTileElm.style.backgroundColor = `hsl(${tile.hue}, ${tile.saturation}%, ${tile.brightness}%)`
-            } else {
-                curTileElm.style.backgroundColor = tile.tileBaseColor
-            }
+            curTileElm.className = `chess-tile ${onOrOffTile} tile-color-${tile.tileBaseColor}`
             
             if(tile.currentPiece) {
                 curTileElm.style.color = tile.currentPiece.color
@@ -55,7 +49,7 @@ export class ChessLightsMain {
 
             let displayText = ""
             if(tile.currentPiece) {
-                displayText = tile.currentPiece.type()
+                displayText = tile.currentPiece.pieceSymbol()
             }
 
             curTileElm.innerHTML = `${displayText}`
@@ -99,7 +93,7 @@ export class ChessLightsMain {
                 // Maps all the cells of a given row into DOM elements
                 const cells = tileRow.map((tile) => {
                     let tileDiv = document.createElement('div')
-                    tileDiv.className = `chess-tile ${tile.id % 2 == 0 ? 'even':'odd'}  ${tile.isOn ? 'on':'off'}`
+                    tileDiv.className = `chess-tile ${tile.id % 2 == 0 ? 'even':'odd'}  ${tile.isOn ? 'on':'off'} tile-color-${tile.tileBaseColor}`
                     tileDiv.id=`tile-${tile.id}`
 
                     let tileClickHandler = () => {
