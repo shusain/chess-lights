@@ -31,7 +31,7 @@ export default class Pawn extends ChessPiece {
     }
 
     // Pawn can move two spots if hasn't moved yet
-    if(!this.hasMoved) {
+    if(!this.hasMoved && !pieceOneAhead) {
       let twoPiecesAhead = boardState.getPieceAtPosition(myPos.x, myPos.y+direction*2)
       if(!twoPiecesAhead) {
         validPositions.push({

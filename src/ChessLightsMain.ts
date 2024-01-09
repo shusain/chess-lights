@@ -104,6 +104,7 @@ export class ChessLightsMain {
                             this.chessBoard.currentPlayersTurn = this.chessBoard.currentPlayersTurn === "white" ? "black" : "white";
                         }
                         else {
+                            this.chessBoard.markAllInvalid();
                             let selectedPiece = this.chessBoard.selectPiece(tile.x, tile.y)
                             let wasOn = tile.isOn;
                             
@@ -112,7 +113,6 @@ export class ChessLightsMain {
                             if(selectedPiece) {
                                 tile.isOn = !wasOn
                                 if(tile.isOn) {
-                                    this.chessBoard.markAllInvalid();
                                     let validMoves = selectedPiece.findValidMoves(this.chessBoard)
     
                                     validMoves.forEach(validMove => {

@@ -95,8 +95,8 @@ export class ChessBoard {
         this.boardTiles[7][2].currentPiece = new Bishop(this.boardTiles[7][2], "black")
         this.boardTiles[7][5].currentPiece = new Bishop(this.boardTiles[7][5], "black")
 
-        this.boardTiles[7][3].currentPiece = new King(this.boardTiles[7][3], "black")
-        this.boardTiles[7][4].currentPiece = new Queen(this.boardTiles[7][4], "black")
+        this.boardTiles[7][4].currentPiece = new King(this.boardTiles[7][4], "black")
+        this.boardTiles[7][3].currentPiece = new Queen(this.boardTiles[7][3], "black")
 
         for(let x=0; x < 8; x++) {
             // White pawns
