@@ -7,7 +7,7 @@ export class SnakePattern implements ILightPattern {
     updatePattern(currentBoard:ChessBoard): ChessBoard {
         currentBoard.turnOffAll()
 
-        let snakeHeadElm = currentBoard.flatLightList[this.snakeHead]
+        let snakeHeadElm = currentBoard.flatTileList[this.snakeHead]
         snakeHeadElm.isOn = true
 
         let curLight = snakeHeadElm

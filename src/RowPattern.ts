@@ -6,9 +6,9 @@ export class RowPattern implements ILightPattern {
     updatePattern(currentBoard:ChessBoard): ChessBoard {
         currentBoard.turnOffAll()
 
-        currentBoard.lightRows[this.currentlyLitLightRow].forEach(lightData => lightData.isOn = true)
+        currentBoard.boardTiles[this.currentlyLitLightRow].forEach(lightData => lightData.isOn = true)
         this.currentlyLitLightRow++
-        if(this.currentlyLitLightRow >= currentBoard.lightRows.length) {
+        if(this.currentlyLitLightRow >= currentBoard.boardTiles.length) {
             this.currentlyLitLightRow = 0
         }
         return currentBoard

@@ -1,15 +1,19 @@
 body {
   box-sizing: border-box;
+  color: green;
+  font-size: 28px;
 }
 #chess-board {
   width: calc(48px * 8 + 8px);
   height: calc(48px * 8 + 8px);
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap-reverse;
+  flex-wrap: wrap;
   border: 1px solid black;
 }
 .chess-tile {
+  user-select: none;
+  cursor: pointer;
   width: 48px;
   height: 48px;
   border-top: 0px;
@@ -23,14 +27,11 @@ body {
   justify-content: center;
 }
 .even {
-  background: green;
+  background: rgb(144, 243, 144);
 }
 .on {
   background: red;
 }
 .row {
   display: flex;
-}
-.row:nth-child(2n-1) {
-  flex-direction: row-reverse;
 }

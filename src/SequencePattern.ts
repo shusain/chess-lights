@@ -8,7 +8,7 @@ export class SequencePattern implements ILightPattern {
     updatePattern(currentBoard:ChessBoard): ChessBoard {
         if(this.firstRun) {
             currentBoard.turnOffAll()
-            currentBoard.flatLightList[0].isOn = true
+            currentBoard.flatTileList[0].isOn = true
             this.firstRun = false
         }
         let currentlyLit = currentBoard.findCurrentlyLit()
