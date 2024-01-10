@@ -5,8 +5,6 @@ import { ChessPiece } from "./ChessPiece";
 export default class King extends ChessPiece {
   pieceSymbol = () => this.color=="black" ?  "♚" : "♔";
   
-  hasMoved:boolean;
-
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {
     const validPositions:Array<{x:number, y:number}> = []
 

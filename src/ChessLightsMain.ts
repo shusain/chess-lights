@@ -22,9 +22,7 @@ export class ChessLightsMain {
             }, 100)
 
             this.chessBoard = new ChessBoard()
-            this.chessBoard.setupDataModel()
-            this.chessBoard.setupPiecesOnBoard()
-            this.buildBoard()
+            this.drawInitialBoard()
             // this.mode = new SequencePattern()
         });
     }
@@ -79,7 +77,7 @@ export class ChessLightsMain {
      * deals with finding valid moves and highlighting cells on the board based on the
      * board model
      */
-    buildBoard() {
+    drawInitialBoard() {
         let chessBoard = document.getElementById('chess-board')
         
         while (chessBoard.firstChild) {
@@ -110,7 +108,7 @@ export class ChessLightsMain {
                             
                             this.chessBoard.turnOffAll();
                             
-                            if(selectedPiece) {
+                            if(selectedPiece && selectedPiece.color == this.chessBoard.currentPlayersTurn) {
                                 tile.isOn = !wasOn
                                 if(tile.isOn) {
                                     let validMoves = selectedPiece.findValidMoves(this.chessBoard)

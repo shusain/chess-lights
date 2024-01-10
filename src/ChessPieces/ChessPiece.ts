@@ -6,11 +6,10 @@ import { ChessTile } from "../ChessTile";
  */
 export abstract class ChessPiece {
   abstract pieceSymbol() : string
+  abstract findValidMoves(boardState : ChessBoard) : Array<{ x: number; y: number; }>
 
   constructor(public currentTile:ChessTile = null, public color: "white" | "black" = "white") {}
 
-  abstract findValidMoves(boardState : ChessBoard) : Array<{ x: number; y: number; }>
-  
   get direction() { return this.color === "white" ? 1 : -1 }
 
   get myPos(){

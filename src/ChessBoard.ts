@@ -15,10 +15,23 @@ export class ChessBoard {
     currentPlayersTurn: "white" | "black" = "white"
     selectedPiece : ChessPiece
 
+    constructor() {
+        this.setupDataModel()
+        this.setupPiecesOnBoard()
+    }
+
     getTileAtPosition(x:number, y:number): ChessTile|null {
         try {
             return this.boardTiles[y][x];
         } catch(e) {
+            return null
+        }
+    }
+    
+    getPieceAtPosition(x:number, y:number): ChessPiece|null {
+        try {
+            return this.boardTiles[y][x].currentPiece
+        } catch(e){
             return null
         }
     }
@@ -28,14 +41,6 @@ export class ChessBoard {
         this.selectedPiece = this.getPieceAtPosition(x,y)
         console.log(this.selectedPiece)
         return this.selectedPiece
-    }
-    
-    getPieceAtPosition(x:number, y:number): ChessPiece|null {
-        try {
-            return this.boardTiles[y][x].currentPiece
-        } catch(e){
-            return null
-        }
     }
 
     movePiece(fromTile:ChessTile, toTile:ChessTile):void {
@@ -49,6 +54,21 @@ export class ChessBoard {
 
         fromTile.currentPiece = null
         toTile.currentPiece.currentTile = toTile
+    }
+    
+    /**
+     * return Array of currently lit positions
+     */
+    findCurrentlyLit() {
+        return this.flatTileList.filter(element => element.isOn )
+    }
+
+    turnOffAll() {
+        this.flatTileList.forEach(light => light.isOn = false)
+    }
+
+    markAllInvalid() {
+        this.flatTileList.forEach(light => light.isValidPosition = false)
     }
 
     setupDataModel() {
@@ -105,21 +125,6 @@ export class ChessBoard {
             // Black pawns
             this.boardTiles[6][x].currentPiece = new Pawn(this.boardTiles[6][x], "black")
         }
-    }
-    
-    /**
-     * return Array of currently lit positions
-     */
-    findCurrentlyLit() {
-        return this.flatTileList.filter(element => element.isOn )
-    }
-
-    turnOffAll() {
-        this.flatTileList.forEach(light => light.isOn = false)
-    }
-
-    markAllInvalid() {
-        this.flatTileList.forEach(light => light.isValidPosition = false)
     }
 
     makeRow(rowNum: number) {
