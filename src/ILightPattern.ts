@@ -1,5 +1,5 @@
-import { ChessBoard } from "./ChessBoard";
+import ChessBoard from "./ChessBoard";
 
-export interface ILightPattern {
+export default interface ILightPattern {
     updatePattern(currentBoard:ChessBoard): ChessBoard
 }

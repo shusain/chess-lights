@@ -1,6 +1,6 @@
-import { ChessBoard } from "../ChessBoard";
-import { ChessTile } from "../ChessTile";
-import { ChessPiece } from "./ChessPiece";
+import ChessBoard from "../ChessBoard";
+import ChessTile from "../ChessTile";
+import ChessPiece from "./ChessPiece";
 
 export default class Pawn extends ChessPiece {
   pieceSymbol = () => this.color=="black" ?  "♟︎" : "♙";
@@ -42,5 +42,9 @@ export default class Pawn extends ChessPiece {
     }
 
     return validPositions;
+  }
+  
+  clone(boardTiles:Array<Array<ChessTile>>): ChessPiece {
+    return new Pawn(boardTiles, this.currentTile.x, this.currentTile.y)
   }
 }

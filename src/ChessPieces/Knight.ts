@@ -1,5 +1,6 @@
-import { ChessBoard } from "../ChessBoard";
-import { ChessPiece } from "./ChessPiece";
+import ChessBoard from "../ChessBoard";
+import ChessTile from "../ChessTile";
+import ChessPiece from "./ChessPiece";
 
 export default class Knight extends ChessPiece {
   pieceSymbol = () => this.color=="black" ?  "♞" : "♘";
@@ -31,5 +32,9 @@ export default class Knight extends ChessPiece {
 
 
     return validPositions
+  }
+  
+  clone(boardTiles:Array<Array<ChessTile>>): ChessPiece {
+    return new Knight(boardTiles, this.currentTile.x, this.currentTile.y)
   }
 }

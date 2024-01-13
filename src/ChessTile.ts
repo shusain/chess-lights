@@ -1,6 +1,6 @@
-import { ChessPiece } from "./ChessPieces/ChessPiece";
+import ChessPiece from "./ChessPieces/ChessPiece";
 
-export class ChessTile {
+export default class ChessTile {
     id: number
     y: number
     x: number
@@ -20,5 +20,11 @@ export class ChessTile {
         this.id = id
         this.x = x
         this.y = y
+    }
+
+    // Just clones the object with properties needed for checking valid positions
+    // for checking hypothetical board states
+    clone() {
+        return new ChessTile(this.id, this.x, this.y)
     }
 }

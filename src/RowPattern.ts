@@ -1,10 +1,10 @@
-import { ChessBoard } from "./ChessBoard";
-import { ILightPattern } from "./ILightPattern";
+import ChessBoard from "./ChessBoard";
+import ILightPattern from "./ILightPattern";
 
 export class RowPattern implements ILightPattern {
     currentlyLitLightRow = 0
     updatePattern(currentBoard:ChessBoard): ChessBoard {
-        currentBoard.turnOffAll()
+        currentBoard.turnOffAllTileLights()
 
         currentBoard.boardTiles[this.currentlyLitLightRow].forEach(lightData => lightData.isOn = true)
         this.currentlyLitLightRow++
