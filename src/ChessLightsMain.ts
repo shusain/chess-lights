@@ -1,8 +1,8 @@
 import ChessBoard from "./ChessBoard"
-import ILightPattern from "./ILightPattern"
-import { RowPattern } from "./RowPattern"
-import { SequencePattern } from "./SequencePattern"
-import { SnakePattern } from "./SnakePattern"
+import ILightPattern from "./LightPatterns/ILightPattern"
+import { RowPattern } from "./LightPatterns/RowPattern"
+import { SequencePattern } from "./LightPatterns/SequencePattern"
+import { SnakePattern } from "./LightPatterns/SnakePattern"
 
 export class ChessLightsMain {
   chessBoard: ChessBoard
@@ -19,50 +19,15 @@ export class ChessLightsMain {
       })
 
       setInterval(() => {
-        this.updateDisplay()
+        this.chessBoard.updateDisplay(this.mode)
       }, 100)
 
-      this.chessBoard = new ChessBoard()
-      this.drawInitialBoard()
+      this.chessBoard = new ChessBoard('chess-board')
+      this.chessBoard.drawInitialBoard()
       // this.mode = new SequencePattern()
     });
   }
 
-  /**
-   * Called on an interval to update the DOM elements that represent the board
-   * visually based on the board model
-   */
-  updateDisplay() {
-    // If using a lighting mode then update the tile light pattern on each loop
-    if (this.mode) {
-      this.chessBoard = this.mode.updatePattern(this.chessBoard)
-    }
-
-    // Update all the tile styles and contents
-    if(this.chessBoard.redraw) {
-      this.chessBoard.flatTileList.forEach(tile => {
-  
-        let curTileElm = document.getElementById(`tile-${tile.id}`)
-        const onOrOffTile = tile.isOn ? 'on' : 'off'
-  
-        const newClassName = `chess-tile ${onOrOffTile} tile-color-${tile.tileBaseColor}`
-        if(curTileElm.className != newClassName)
-        curTileElm.className = `chess-tile ${onOrOffTile} tile-color-${tile.tileBaseColor}`
-  
-        if (tile.currentPiece) {
-          curTileElm.style.color = tile.currentPiece.color
-        }
-  
-        let displayText = ""
-        if (tile.currentPiece) {
-          displayText = tile.currentPiece.pieceSymbol()
-        }
-  
-        curTileElm.innerHTML = `${displayText}`
-      })
-      this.chessBoard.redraw = false
-    }
-  }
 
   /**
    * Method handles drop down change events and creates the corresponding light
@@ -83,39 +48,6 @@ export class ChessLightsMain {
         break;
     }
   }
-
-  /**
-   * Clears out and rebuilds the DOM elements for the board based on the board model
-   * deals with finding valid moves and highlighting cells on the board based on the
-   * board model
-   */
-  drawInitialBoard() {
-    let chessBoard = document.getElementById('chess-board')
-
-    while (chessBoard.firstChild) {
-      chessBoard.removeChild(chessBoard.firstChild);
-    }
-
-    // Maps all the tiles row by row into DOM elements
-    const boardRowDOMElms = this.chessBoard.boardTiles
-      .map((tileRow) => {
-
-        // Maps all the cells of a given row into DOM elements
-        const cells = tileRow.map((tile) => {
-          let tileDiv = document.createElement('div')
-          tileDiv.className = `chess-tile ${tile.id % 2 == 0 ? 'even' : 'odd'}  ${tile.isOn ? 'on' : 'off'} tile-color-${tile.tileBaseColor}`
-          tileDiv.id = `tile-${tile.id}`
-
-          tileDiv.addEventListener('click', () => { this.chessBoard.tileClickHandler(tile) })
-          return tileDiv
-        })
-        let rowDiv = document.createElement('div')
-        rowDiv.className = 'row'
-        cells.forEach(cell => { rowDiv.appendChild(cell) })
-        return rowDiv
-      })
-    boardRowDOMElms.forEach(boardRowDOMElm => chessBoard.appendChild(boardRowDOMElm))
-
-  }
+  
 }
 new ChessLightsMain()

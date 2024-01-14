@@ -1,4 +1,5 @@
 import ChessPiece from "./ChessPieces/ChessPiece";
+import {getFile, getRank} from "./ChessPieces/util"
 
 export default class ChessTile {
     id: number
@@ -26,5 +27,8 @@ export default class ChessTile {
     // for checking hypothetical board states
     clone() {
         return new ChessTile(this.id, this.x, this.y)
+    }
+    toString() {
+        return `${getFile(this.x)}${getRank(this.y)} with Piece ${this.currentPiece}`
     }
 }

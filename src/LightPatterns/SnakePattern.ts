@@ -1,10 +1,10 @@
-import ChessBoard from "./ChessBoard";
+import ChessBoard from "../ChessBoard";
 import ILightPattern from "./ILightPattern";
 
 export class SnakePattern implements ILightPattern {
     snakeHead = 0
     snakeLength = 12
-    updatePattern(currentBoard:ChessBoard): ChessBoard {
+    updatePattern(currentBoard:ChessBoard): void {
         currentBoard.turnOffAllTileLights()
 
         let snakeHeadElm = currentBoard.flatTileList[this.snakeHead]
@@ -17,6 +17,5 @@ export class SnakePattern implements ILightPattern {
             if(i==0)
                 this.snakeHead = curLight.id
         }
-        return currentBoard
     }
 }

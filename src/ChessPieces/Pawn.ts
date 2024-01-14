@@ -45,6 +45,6 @@ export default class Pawn extends ChessPiece {
   }
   
   clone(boardTiles:Array<Array<ChessTile>>): ChessPiece {
-    return new Pawn(boardTiles, this.currentTile.x, this.currentTile.y)
+    return new Pawn(boardTiles, this.currentTile.y, this.currentTile.x, this.color)
   }
 }

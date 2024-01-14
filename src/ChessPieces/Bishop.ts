@@ -83,8 +83,8 @@ export default class Bishop extends ChessPiece {
     return validPositions
 
   }
-  
+
   clone(boardTiles:Array<Array<ChessTile>>): ChessPiece {
-    return new Bishop(boardTiles, this.currentTile.x, this.currentTile.y)
+    return new Bishop(boardTiles, this.currentTile.y,this.currentTile.x, this.color)
   }
 }

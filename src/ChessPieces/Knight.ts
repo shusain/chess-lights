@@ -35,6 +35,6 @@ export default class Knight extends ChessPiece {
   }
   
   clone(boardTiles:Array<Array<ChessTile>>): ChessPiece {
-    return new Knight(boardTiles, this.currentTile.x, this.currentTile.y)
+    return new Knight(boardTiles, this.currentTile.y, this.currentTile.x, this.color)
   }
 }
