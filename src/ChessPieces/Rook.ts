@@ -84,6 +84,6 @@ export default class Rook extends ChessPiece {
   }
   
   clone(boardTiles:Array<Array<ChessTile>>): ChessPiece {
-    return new Rook(boardTiles, this.currentTile.x, this.currentTile.y)
+    return new Rook(boardTiles, this.currentTile.y, this.currentTile.x, this.color)
   }
 }

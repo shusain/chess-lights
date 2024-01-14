@@ -152,6 +152,6 @@ export default class Queen extends ChessPiece {
   }
   
   clone(boardTiles:Array<Array<ChessTile>>): ChessPiece {
-    return new Queen(boardTiles, this.currentTile.x, this.currentTile.y)
+    return new Queen(boardTiles, this.currentTile.y, this.currentTile.x, this.color)
   }
 }

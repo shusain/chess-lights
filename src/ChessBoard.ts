@@ -7,6 +7,7 @@ import Queen from "./ChessPieces/Queen";
 import King from "./ChessPieces/King";
 import ChessPiece from "./ChessPieces/ChessPiece";
 import Player from "./Player";
+import ILightPattern from "./LightPatterns/ILightPattern";
 
 /**
  * Builds the board and keeps track of the game state (selected piece, current player etc)
@@ -18,10 +19,9 @@ export default class ChessBoard {
   boardTiles: Array<Array<ChessTile>> = []
   flatTileList: Array<ChessTile> = []
   players: Array<Player> = []
-
   counter = 0
-
   selectedPiece: ChessPiece
+
   get currentPlayersTurn(): "white" | "black" {
     return this.currentPlayer.color
   }
@@ -33,9 +33,10 @@ export default class ChessBoard {
     return this.players[1]
   }
 
-  constructor() {
+  constructor(private targetElement:string, autoSetupPieces:boolean = true) {
     this.setupDataModel()
-    this.setupPiecesOnBoard()
+    if(autoSetupPieces)
+      this.setupPiecesOnBoard()
   }
 
   /**
@@ -87,9 +88,30 @@ export default class ChessBoard {
    * @param toTile The tile to move the piece to
    * @returns [boolean] true if the piece was moved false if it was not
    */
-  movePiece(fromTile: ChessTile, toTile: ChessTile): boolean {
-    console.log('moving piece', fromTile, toTile)
+  movePiece(fromTile: ChessTile, toTile: ChessTile, withChecking:boolean=true): boolean {
+    console.log(`moving piece from: ${fromTile}, to: ${toTile}`)
 
+    // Cloning the current board so can simulate the move and see if the
+    // current players king is left in check
+    if(withChecking)
+    {
+      let clonedBoardState = this.clone()
+      clonedBoardState.movePiecePosition(fromTile, toTile)
+      clonedBoardState.redraw = true
+      clonedBoardState.updateDisplay()
+      let willMovePutPlayerIntoCheck = clonedBoardState.checkIfCurrentPlayerIsInCheck()
+      console.log(`will move leave player in check ${willMovePutPlayerIntoCheck}`)
+  
+      if(willMovePutPlayerIntoCheck) return false
+    }
+    
+
+    if(toTile.currentPiece) {
+      if(toTile.currentPiece.color=="white")
+      this.players[0].pieces = this.players[0].pieces.filter(piece => piece!= toTile.currentPiece)
+      if(toTile.currentPiece.color=="black")
+      this.players[1].pieces = this.players[1].pieces.filter(piece => piece!= toTile.currentPiece)
+    }
     toTile.currentPiece = fromTile.currentPiece
 
     if (toTile.currentPiece instanceof Pawn) {
@@ -99,21 +121,19 @@ export default class ChessBoard {
     fromTile.currentPiece = null
     toTile.currentPiece.currentTile = toTile
 
+    this.redraw = true
+    this.updateDisplay()
+
     return true
   }
 
-  /**
-   * return Array of currently lit positions
-   */
-  findCurrentlyLit() {
-    return this.flatTileList.filter(element => element.isOn)
-  }
+  // This method doesn't depend on being passed the tile itself necessarily it
+  // will use the given position to find the 
+  movePiecePosition(fromPosition: {x:number, y:number}, toPosition: {x: number, y:number}) {
+    let fromTile = this.getTileAtPosition(fromPosition.x, fromPosition.y)
+    let toTile = this.getTileAtPosition(toPosition.x, toPosition.y)
 
-  /**
-   * Sets the isOn property to false for all tiles
-   */
-  turnOffAllTileLights() {
-    this.flatTileList.forEach(light => light.isOn = false)
+    this.movePiece(fromTile, toTile, false)
   }
 
   /**
@@ -213,20 +233,22 @@ export default class ChessBoard {
     }
   }
 
-  checkIfCurrentPlayerIsInCheck() {
-    this.checkIfPlayerIsInCheck(this.currentPlayer)
+  checkIfCurrentPlayerIsInCheck():boolean {
+    return this.checkIfPlayerIsInCheck(this.currentPlayer)
   }
 
-  checkIfPlayerIsInCheck(targetPlayer:Player) {
+  checkIfPlayerIsInCheck(targetPlayer:Player):boolean {
     const otherPlayer = this.whitePlayer == targetPlayer ? this.blackPlayer : this.whitePlayer
 
+    let kingIsInCheck = false
     otherPlayer.pieces.forEach(piece => {
       const validMoves = piece.findValidMoves(this)
       // If king is in check
       if(targetPlayer.king && validMoves.find(val => val.x == targetPlayer.king.currentTile.x && val.y == targetPlayer.king.currentTile.y) ) {
-        alert("king in check")
+        kingIsInCheck = true
       }
     })
+    return kingIsInCheck
   }
 
   /**
@@ -239,7 +261,6 @@ export default class ChessBoard {
   checkIfPlayerIsInCheckmate(targetPlayer:Player) {
     const otherPlayer = this.whitePlayer == targetPlayer ? this.blackPlayer : this.whitePlayer
 
-    let currentBoardState = this.clone()
     otherPlayer.pieces.forEach(piece => {
       const validMoves = piece.findValidMoves(this)
       // If king is in check
@@ -250,22 +271,46 @@ export default class ChessBoard {
   }
 
   clone() {
-    let clonedBoard = new ChessBoard()
+    const clonedBoard = new ChessBoard('hypothetical-board', false)
 
-    // Just copying the players since we only need them for reference of their pieces
-    // and won't be changing the players pieces when checking board states
-    clonedBoard.players = this.players
+    // Cloning players so can maniuplate their pieces in new board states
+    clonedBoard.players = this.players.map(player=>player.clone())
 
+    clonedBoard.currentPlayer = this.currentPlayer.color == "white" ? clonedBoard.whitePlayer : clonedBoard.blackPlayer
+
+
+    // Cloning board tiles so can manipulate what piece is on what tile without 
+    // effecting the actual game being played.
+    clonedBoard.boardTiles = this.boardTiles.map<Array<ChessTile>>((rowOfTiles) => {
+        const newRowOfTiles = rowOfTiles.map(singleTile => {
+          const clonedTile = singleTile.clone()
+          if(singleTile.currentPiece) {
+            clonedTile.currentPiece = singleTile.currentPiece.clone(clonedBoard.boardTiles)
+            if(clonedTile.currentPiece) {
+              if(clonedTile.currentPiece.color == "black")
+                clonedBoard.blackPlayer.pieces.push(clonedTile.currentPiece)
+              if(clonedTile.currentPiece.color == "white")
+                clonedBoard.whitePlayer.pieces.push(clonedTile.currentPiece)
+            }
+          }
+          return clonedTile
+        })
+        return newRowOfTiles
+    })
+    clonedBoard.selectPiece(this.selectedPiece.currentTile.x, this.selectedPiece.currentTile.y)
+    clonedBoard.tileClickHandler(clonedBoard.selectedPiece.currentTile)
+    clonedBoard.drawInitialBoard()
     return clonedBoard
   }
 
   tileClickHandler(tile: ChessTile) {
     if (tile.isValidPosition) {
-      this.movePiece(this.selectedPiece.currentTile, tile)
-      this.turnOffAllTileLights();
-      this.markAllInvalid();
-      this.changeCurrentPlayer();
-      this.checkIfCurrentPlayerIsInCheck();
+      if(this.movePiece(this.selectedPiece.currentTile, tile)) {
+        this.turnOffAllTileLights();
+        this.markAllInvalid();
+        this.changeCurrentPlayer();
+        this.checkIfCurrentPlayerIsInCheck();
+      }
     }
     else {
       this.markAllInvalid();
@@ -288,6 +333,95 @@ export default class ChessBoard {
     }
 
     this.redraw = true
+
+  }
+  
+
+  /**
+   * return Array of currently lit positions
+   */
+  findCurrentlyLit() {
+    return this.flatTileList.filter(element => element.isOn)
+  }
+
+  /**
+   * Sets the isOn property to false for all tiles
+   */
+  turnOffAllTileLights() {
+    this.flatTileList.forEach(light => light.isOn = false)
+  }
+
+  
+  /**
+   * Called on an interval to update the DOM elements that represent the board
+   * visually based on the board model
+   */
+  updateDisplay(lightMode:ILightPattern = null) {
+
+    // If using a lighting mode then update the tile light pattern on each display update
+    if (lightMode) {
+      lightMode.updatePattern(this)
+      this.redraw = true
+    }
+
+    // If chessboard marked for redraw (after moves) update all the tile styles and contents
+    if(this.redraw) {
+      this.flatTileList.forEach(tile => {
+  
+        let curTileElm = document.getElementById(`${this.targetElement}-tile-${tile.id}`)
+        const onOrOffTile = tile.isOn ? 'on' : 'off'
+  
+        const newClassName = `chess-tile ${onOrOffTile} tile-color-${tile.tileBaseColor}`
+        if(curTileElm.className != newClassName)
+        curTileElm.className = `chess-tile ${onOrOffTile} tile-color-${tile.tileBaseColor}`
+  
+        if (tile.currentPiece) {
+          curTileElm.style.color = tile.currentPiece.color
+        }
+  
+        let displayText = ""
+        if (tile.currentPiece) {
+          displayText = tile.currentPiece.pieceSymbol()
+        }
+  
+        curTileElm.innerHTML = `${displayText}`
+      })
+      this.redraw = false
+    }
+  }
+
+  /**
+   * Clears out and rebuilds the DOM elements for the board based on the board model
+   * deals with finding valid moves and highlighting cells on the board based on the
+   * board model
+   */
+  drawInitialBoard() {
+    let chessBoard = document.getElementById(this.targetElement)
+
+    // Emptying out the elements from the board container
+    while (chessBoard.firstChild) {
+      chessBoard.removeChild(chessBoard.firstChild);
+    }
+
+    // Maps all the tiles row by row into DOM elements
+    const boardRowDOMElms = this.boardTiles
+      .map((tileRow) => {
+
+        // Maps all the cells of a given row into DOM elements
+        const cells = tileRow.map((tile) => {
+          let tileDiv = document.createElement('div')
+          tileDiv.className = `chess-tile ${tile.id % 2 == 0 ? 'even' : 'odd'}  ${tile.isOn ? 'on' : 'off'} tile-color-${tile.tileBaseColor}`
+          tileDiv.id = `${this.targetElement}-tile-${tile.id}`
+
+          tileDiv.addEventListener('click', () => { this.tileClickHandler(tile) })
+          return tileDiv
+        })
+        let rowDiv = document.createElement('div')
+        rowDiv.className = 'row'
+        cells.forEach(cell => { rowDiv.appendChild(cell) })
+        return rowDiv
+      })
+    boardRowDOMElms.forEach(boardRowDOMElm => chessBoard.appendChild(boardRowDOMElm))
 
   }
 }

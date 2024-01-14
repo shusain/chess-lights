@@ -28,4 +28,8 @@ export default abstract class ChessPiece {
     }
   }
 
+  toString() {
+    return `${this.pieceSymbol()}`
+  }
+
 }

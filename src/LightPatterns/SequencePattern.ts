@@ -1,11 +1,11 @@
-import ChessBoard from "./ChessBoard";
+import ChessBoard from "../ChessBoard";
 import ILightPattern from "./ILightPattern";
 
 export class SequencePattern implements ILightPattern {
     firstRun = true
     constructor() {
     }
-    updatePattern(currentBoard:ChessBoard): ChessBoard {
+    updatePattern(currentBoard:ChessBoard): void {
         if(this.firstRun) {
             currentBoard.turnOffAllTileLights()
             currentBoard.flatTileList[0].isOn = true
@@ -22,6 +22,5 @@ export class SequencePattern implements ILightPattern {
                 lightData.nextLight.isOn = true;
             }
         }
-        return currentBoard
     }
 }
