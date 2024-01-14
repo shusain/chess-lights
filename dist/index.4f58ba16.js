@@ -570,7 +570,7 @@ class ChessLightsMain {
 }
 new ChessLightsMain();
 
-},{"./ChessBoard":"euRaP","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./LightPatterns/RowPattern":"1VAOD","./LightPatterns/SequencePattern":"hpQSK","./LightPatterns/SnakePattern":"9Y8oI"}],"euRaP":[function(require,module,exports) {
+},{"./ChessBoard":"euRaP","./LightPatterns/RowPattern":"1VAOD","./LightPatterns/SequencePattern":"hpQSK","./LightPatterns/SnakePattern":"9Y8oI","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"euRaP":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 /**
@@ -669,6 +669,12 @@ class ChessBoard {
             let willMovePutPlayerIntoCheck = clonedBoardState.checkIfCurrentPlayerIsInCheck();
             console.log(`will move leave player in check ${willMovePutPlayerIntoCheck}`);
             if (willMovePutPlayerIntoCheck) return false;
+        }
+        if (toTile.currentPiece) {
+            if (toTile.currentPiece.color == "white") this.players[0].pieces = this.players[0].pieces.filter((piece)=>piece != toTile.currentPiece
+            );
+            if (toTile.currentPiece.color == "black") this.players[1].pieces = this.players[1].pieces.filter((piece)=>piece != toTile.currentPiece
+            );
         }
         toTile.currentPiece = fromTile.currentPiece;
         if (toTile.currentPiece instanceof _pawnDefault.default) toTile.currentPiece.hasMoved = true;
@@ -1081,7 +1087,7 @@ class ChessTile {
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./ChessPieces/util":"cUcyx"}],"cUcyx":[function(require,module,exports) {
+},{"./ChessPieces/util":"cUcyx","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"cUcyx":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "getRank", ()=>getRank

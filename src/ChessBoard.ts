@@ -106,6 +106,12 @@ export default class ChessBoard {
     }
     
 
+    if(toTile.currentPiece) {
+      if(toTile.currentPiece.color=="white")
+      this.players[0].pieces = this.players[0].pieces.filter(piece => piece!= toTile.currentPiece)
+      if(toTile.currentPiece.color=="black")
+      this.players[1].pieces = this.players[1].pieces.filter(piece => piece!= toTile.currentPiece)
+    }
     toTile.currentPiece = fromTile.currentPiece
 
     if (toTile.currentPiece instanceof Pawn) {
