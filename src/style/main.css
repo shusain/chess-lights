@@ -1,16 +1,25 @@
 body {
   box-sizing: border-box;
-  color: green;
-  font-size: 4rem;
+  color: black;
+  font-size: 2rem;
   font-family: "MS Gothic";
 }
+
+#hypothetical-board { 
+  display: none !important;
+}
+
 #chess-board, #hypothetical-board {
   width: calc(96px * 8);
   height: calc(96px * 8);
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  font-size: 4rem;
+  font-family: "MS Gothic";
+  margin-bottom: 1rem;
 }
+
 
 .tile-color-white {
   background: rgb(128, 184, 123);
