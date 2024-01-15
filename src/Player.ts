@@ -3,6 +3,8 @@ import King from "./ChessPieces/King";
 
 export default class Player {
   pieces: Array<ChessPiece> = []
+  inCheck: boolean
+
   constructor(public color: "white" | "black") { }
   get king() {
     return this.pieces.find((value,index,obj) => {

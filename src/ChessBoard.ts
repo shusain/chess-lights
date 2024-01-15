@@ -116,13 +116,14 @@ export default class ChessBoard {
 
     if (toTile.currentPiece instanceof Pawn) {
       toTile.currentPiece.hasMoved = true
+      if(toTile.y == 0 || toTile.y==7) {
+        toTile.currentPiece = new Queen(this.boardTiles, toTile.y, toTile.x, toTile.currentPiece.color)
+      }
     }
 
     fromTile.currentPiece = null
     toTile.currentPiece.currentTile = toTile
 
-    this.redraw = true
-    this.updateDisplay()
 
     return true
   }
@@ -260,12 +261,15 @@ export default class ChessBoard {
    */
   checkIfPlayerIsInCheckmate(targetPlayer:Player) {
     const otherPlayer = this.whitePlayer == targetPlayer ? this.blackPlayer : this.whitePlayer
+    
+    targetPlayer.inCheck = false
 
     otherPlayer.pieces.forEach(piece => {
       const validMoves = piece.findValidMoves(this)
       // If king is in check
       if(targetPlayer.king && validMoves.find(val => val.x == targetPlayer.king.currentTile.x && val.y == targetPlayer.king.currentTile.y) ) {
         alert("king in check")
+        targetPlayer.inCheck = true
       }
     })
   }
@@ -308,8 +312,14 @@ export default class ChessBoard {
       if(this.movePiece(this.selectedPiece.currentTile, tile)) {
         this.turnOffAllTileLights();
         this.markAllInvalid();
+        // Update the inCheck value for current player
+        this.currentPlayer.inCheck = this.checkIfCurrentPlayerIsInCheck();
+        // switching over to other player
         this.changeCurrentPlayer();
-        this.checkIfCurrentPlayerIsInCheck();
+        // Checking if the new player is now in check.
+        this.currentPlayer.inCheck = this.checkIfCurrentPlayerIsInCheck();
+        this.redraw = true
+        this.updateDisplay()
       }
     }
     else {
@@ -325,8 +335,11 @@ export default class ChessBoard {
 
           validMoves.forEach(validMove => {
             // Marking all the valid moves for the selected piece on the board
-            this.getTileAtPosition(validMove.x, validMove.y).isValidPosition = true
-            this.getTileAtPosition(validMove.x, validMove.y).isOn = true
+            let potentialMovePosition = this.getTileAtPosition(validMove.x, validMove.y)
+            if(potentialMovePosition){
+              potentialMovePosition.isValidPosition = true
+              potentialMovePosition.isOn = true
+            }
           })
         }
       }
@@ -366,6 +379,15 @@ export default class ChessBoard {
 
     // If chessboard marked for redraw (after moves) update all the tile styles and contents
     if(this.redraw) {
+      let gameStatusText = ""
+
+      if(this.whitePlayer.inCheck)
+        gameStatusText += "White player is in check. "
+      if(this.blackPlayer.inCheck)
+        gameStatusText += "Black player is in check. "
+
+      document.getElementById('game-status').innerHTML = gameStatusText
+
       this.flatTileList.forEach(tile => {
   
         let curTileElm = document.getElementById(`${this.targetElement}-tile-${tile.id}`)
