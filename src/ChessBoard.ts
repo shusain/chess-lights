@@ -9,6 +9,11 @@ import ChessPiece from "./ChessPieces/ChessPiece";
 import Player from "./Player";
 import ILightPattern from "./LightPatterns/ILightPattern";
 
+type BoardPosition = {
+  x:number
+  y:number
+}
+
 /**
  * Builds the board and keeps track of the game state (selected piece, current player etc)
  * 
@@ -76,8 +81,16 @@ export default class ChessBoard {
   selectPiece(x: number, y: number): ChessPiece | null {
     // Don't return a piece if a tile has a piece, but the piece isn't the same color as the current player
     this.selectedPiece = this.getPieceAtPosition(x, y)
-    console.log(this.selectedPiece)
+    console.log(`Selected Piece: ${this.selectedPiece}`)
     return this.selectedPiece
+  }
+
+  isPlayerInCheckAfterClonedBoardMove(fromTile: BoardPosition, toTile: BoardPosition):boolean {
+    let clonedBoardState = this.clone()
+    clonedBoardState.movePiecePosition(fromTile, toTile)
+    clonedBoardState.redraw = true
+    clonedBoardState.updateDisplay()
+    return clonedBoardState.checkIfCurrentPlayerIsInCheck()
   }
 
   /**
@@ -95,11 +108,7 @@ export default class ChessBoard {
     // current players king is left in check
     if(withChecking)
     {
-      let clonedBoardState = this.clone()
-      clonedBoardState.movePiecePosition(fromTile, toTile)
-      clonedBoardState.redraw = true
-      clonedBoardState.updateDisplay()
-      let willMovePutPlayerIntoCheck = clonedBoardState.checkIfCurrentPlayerIsInCheck()
+      let willMovePutPlayerIntoCheck = this.isPlayerInCheckAfterClonedBoardMove(fromTile, toTile)
       console.log(`will move leave player in check ${willMovePutPlayerIntoCheck}`)
   
       if(willMovePutPlayerIntoCheck) return false
@@ -254,24 +263,26 @@ export default class ChessBoard {
 
   /**
    * Will see if moving any of the target player's pieces will result in the
-   * player no longer being in check
+   * player no longer being in check, will be called only if the target players
+   * king is already known to be in check currently
    * 
    * @param targetPlayer The player to see if cannot make a move to get out of
    * check mate
    */
-  checkIfPlayerIsInCheckmate(targetPlayer:Player) {
+  checkIfPlayerIsInCheckmate(targetPlayer:Player = this.currentPlayer) {
     const otherPlayer = this.whitePlayer == targetPlayer ? this.blackPlayer : this.whitePlayer
     
-    targetPlayer.inCheck = false
-
-    otherPlayer.pieces.forEach(piece => {
-      const validMoves = piece.findValidMoves(this)
-      // If king is in check
-      if(targetPlayer.king && validMoves.find(val => val.x == targetPlayer.king.currentTile.x && val.y == targetPlayer.king.currentTile.y) ) {
-        alert("king in check")
-        targetPlayer.inCheck = true
-      }
+    // For each of the target players pieces we'll clone the board, make the valid move and see if the player
+    // is in check on the cloned board.
+    let anyMoveGetsKingOutofCheck = false
+    targetPlayer.pieces.forEach(piece => {
+      const clonedBoard = this.clone()
+      const validMoves = piece.findValidMoves(clonedBoard)
+      validMoves.forEach(move => {
+        anyMoveGetsKingOutofCheck = anyMoveGetsKingOutofCheck || !clonedBoard.isPlayerInCheckAfterClonedBoardMove(piece.currentTile, move)
+      })
     })
+    return !anyMoveGetsKingOutofCheck
   }
 
   clone() {
@@ -318,6 +329,9 @@ export default class ChessBoard {
         this.changeCurrentPlayer();
         // Checking if the new player is now in check.
         this.currentPlayer.inCheck = this.checkIfCurrentPlayerIsInCheck();
+        if(this.currentPlayer.inCheck) {
+          this.currentPlayer.inCheckmate = this.checkIfPlayerIsInCheckmate()
+        }
         this.redraw = true
         this.updateDisplay()
       }
@@ -385,6 +399,11 @@ export default class ChessBoard {
         gameStatusText += "White player is in check. "
       if(this.blackPlayer.inCheck)
         gameStatusText += "Black player is in check. "
+
+      if(this.whitePlayer.inCheckmate)
+        gameStatusText = "White player is in checkmate. GG"
+      if(this.blackPlayer.inCheckmate)
+        gameStatusText = "Black player is in checkmate. GG"
 
       document.getElementById('game-status').innerHTML = gameStatusText
 
