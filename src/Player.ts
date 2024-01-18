@@ -5,6 +5,7 @@ export default class Player {
   pieces: Array<ChessPiece> = []
   inCheck: boolean
   inCheckmate: boolean
+  inStalemate: boolean
 
   constructor(public color: "white" | "black") { }
   get king() {
@@ -14,5 +15,8 @@ export default class Player {
   }
   clone() {
     return new Player(this.color)
+  }
+  toString() {
+    return `${this.color} player, pieces: ${this.pieces}`
   }
 }

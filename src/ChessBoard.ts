@@ -81,7 +81,8 @@ export default class ChessBoard {
   selectPiece(x: number, y: number): ChessPiece | null {
     // Don't return a piece if a tile has a piece, but the piece isn't the same color as the current player
     this.selectedPiece = this.getPieceAtPosition(x, y)
-    console.log(`Selected Piece: ${this.selectedPiece}`)
+
+    // console.log(`Selected Piece: ${this.selectedPiece} on board: ${this.targetElement}`)
     return this.selectedPiece
   }
 
@@ -90,7 +91,7 @@ export default class ChessBoard {
     clonedBoardState.movePiecePosition(fromTile, toTile)
     clonedBoardState.redraw = true
     clonedBoardState.updateDisplay()
-    return clonedBoardState.checkIfCurrentPlayerIsInCheck()
+    return clonedBoardState.checkIfPlayerIsInCheck()
   }
 
   /**
@@ -102,7 +103,7 @@ export default class ChessBoard {
    * @returns [boolean] true if the piece was moved false if it was not
    */
   movePiece(fromTile: ChessTile, toTile: ChessTile, withChecking:boolean=true): boolean {
-    console.log(`moving piece from: ${fromTile}, to: ${toTile}`)
+    console.log(`moving piece from: ${fromTile}, to: ${toTile} on board: ${this.targetElement}`)
 
     // Cloning the current board so can simulate the move and see if the
     // current players king is left in check
@@ -126,7 +127,9 @@ export default class ChessBoard {
     if (toTile.currentPiece instanceof Pawn) {
       toTile.currentPiece.hasMoved = true
       if(toTile.y == 0 || toTile.y==7) {
-        toTile.currentPiece = new Queen(this.boardTiles, toTile.y, toTile.x, toTile.currentPiece.color)
+        let theNewQueen = new Queen(this.boardTiles, toTile.y, toTile.x, toTile.currentPiece.color)
+        this.currentPlayer.pieces.splice(this.currentPlayer.pieces.indexOf(toTile.currentPiece), 1, theNewQueen)
+        toTile.currentPiece = theNewQueen
       }
     }
 
@@ -139,7 +142,7 @@ export default class ChessBoard {
 
   // This method doesn't depend on being passed the tile itself necessarily it
   // will use the given position to find the 
-  movePiecePosition(fromPosition: {x:number, y:number}, toPosition: {x: number, y:number}) {
+  movePiecePosition(fromPosition: BoardPosition, toPosition: BoardPosition) {
     let fromTile = this.getTileAtPosition(fromPosition.x, fromPosition.y)
     let toTile = this.getTileAtPosition(toPosition.x, toPosition.y)
 
@@ -229,6 +232,7 @@ export default class ChessBoard {
 
   changeCurrentPlayer() {
     this.currentPlayer = this.currentPlayer === this.players[0] ? this.players[1] : this.players[0];
+    console.log(`Switched players is now ${this.currentPlayer} turn`)
   }
 
   makeRow(rowNum: number) {
@@ -243,11 +247,7 @@ export default class ChessBoard {
     }
   }
 
-  checkIfCurrentPlayerIsInCheck():boolean {
-    return this.checkIfPlayerIsInCheck(this.currentPlayer)
-  }
-
-  checkIfPlayerIsInCheck(targetPlayer:Player):boolean {
+  checkIfPlayerIsInCheck(targetPlayer:Player = this.currentPlayer):boolean {
     const otherPlayer = this.whitePlayer == targetPlayer ? this.blackPlayer : this.whitePlayer
 
     let kingIsInCheck = false
@@ -269,9 +269,7 @@ export default class ChessBoard {
    * @param targetPlayer The player to see if cannot make a move to get out of
    * check mate
    */
-  checkIfPlayerIsInCheckmate(targetPlayer:Player = this.currentPlayer) {
-    const otherPlayer = this.whitePlayer == targetPlayer ? this.blackPlayer : this.whitePlayer
-    
+  cannotMakeAnyMoveWithoutLeavingKingInCheck(targetPlayer:Player = this.currentPlayer) {
     // For each of the target players pieces we'll clone the board, make the valid move and see if the player
     // is in check on the cloned board.
     let anyMoveGetsKingOutofCheck = false
@@ -284,6 +282,7 @@ export default class ChessBoard {
     })
     return !anyMoveGetsKingOutofCheck
   }
+
 
   clone() {
     const clonedBoard = new ChessBoard('hypothetical-board', false)
@@ -315,6 +314,7 @@ export default class ChessBoard {
     clonedBoard.selectPiece(this.selectedPiece.currentTile.x, this.selectedPiece.currentTile.y)
     clonedBoard.tileClickHandler(clonedBoard.selectedPiece.currentTile)
     clonedBoard.drawInitialBoard()
+    clonedBoard.updateDisplay()
     return clonedBoard
   }
 
@@ -323,17 +323,18 @@ export default class ChessBoard {
       if(this.movePiece(this.selectedPiece.currentTile, tile)) {
         this.turnOffAllTileLights();
         this.markAllInvalid();
-        // Update the inCheck value for current player
-        this.currentPlayer.inCheck = this.checkIfCurrentPlayerIsInCheck();
+        this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
+        console.log(`checking if current player ${this.currentPlayer} is in check`)
         // switching over to other player
         this.changeCurrentPlayer();
         // Checking if the new player is now in check.
-        this.currentPlayer.inCheck = this.checkIfCurrentPlayerIsInCheck();
+        console.log(`checking if current player ${this.currentPlayer} is in check`)
+        this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
         if(this.currentPlayer.inCheck) {
-          this.currentPlayer.inCheckmate = this.checkIfPlayerIsInCheckmate()
+          this.currentPlayer.inCheckmate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
+        } else {
+          this.currentPlayer.inStalemate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
         }
-        this.redraw = true
-        this.updateDisplay()
       }
     }
     else {
@@ -360,7 +361,6 @@ export default class ChessBoard {
     }
 
     this.redraw = true
-
   }
   
 
@@ -404,6 +404,9 @@ export default class ChessBoard {
         gameStatusText = "White player is in checkmate. GG"
       if(this.blackPlayer.inCheckmate)
         gameStatusText = "Black player is in checkmate. GG"
+
+      if(this.whitePlayer.inStalemate || this.blackPlayer.inStalemate)
+        gameStatusText = "Game is in stalemate. GG"
 
       document.getElementById('game-status').innerHTML = gameStatusText
 
