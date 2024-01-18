@@ -3,9 +3,9 @@ import King from "./ChessPieces/King";
 
 export default class Player {
   pieces: Array<ChessPiece> = []
-  inCheck: boolean
-  inCheckmate: boolean
-  inStalemate: boolean
+  inCheck: boolean = false
+  inCheckmate: boolean = false
+  inStalemate: boolean = false
 
   constructor(public color: "white" | "black") { }
   get king() {
@@ -17,6 +17,6 @@ export default class Player {
     return new Player(this.color)
   }
   toString() {
-    return `${this.color} player, pieces: ${this.pieces}`
+    return `${this.color} player, pieces: ${this.pieces}, in check: ${this.inCheck}, in stalemate: ${this.inStalemate}, in checkmate: ${this.inCheckmate}`
   }
 }

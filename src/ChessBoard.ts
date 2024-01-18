@@ -324,17 +324,19 @@ export default class ChessBoard {
         this.turnOffAllTileLights();
         this.markAllInvalid();
         this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
-        console.log(`checking if current player ${this.currentPlayer} is in check`)
+        console.log(`just checked current player is in check ${this.currentPlayer}`)
         // switching over to other player
         this.changeCurrentPlayer();
         // Checking if the new player is now in check.
-        console.log(`checking if current player ${this.currentPlayer} is in check`)
         this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
         if(this.currentPlayer.inCheck) {
+          console.log(`Checking if ${this.currentPlayer.color} in checkmate`)
           this.currentPlayer.inCheckmate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
         } else {
+          console.log(`Checking if ${this.currentPlayer.color} in stalemate`)
           this.currentPlayer.inStalemate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
         }
+        console.log(`done with checks:\n${this.currentPlayer}`)
       }
     }
     else {
