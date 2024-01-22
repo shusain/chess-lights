@@ -14,7 +14,7 @@ export default abstract class ChessPiece {
   abstract clone(boardTiles:Array<Array<ChessTile>>): ChessPiece
   public currentTile: ChessTile = null
 
-  constructor(boardTiles: Array<Array<ChessTile>>, x: number, y: number, public color: "white" | "black" = "white") {
+  constructor(boardTiles: Array<Array<ChessTile>>, x: number, y: number, public color: "white" | "black" = "white", public hasMoved = false) {
     boardTiles[x][y].currentPiece = this
     this.currentTile = boardTiles[x][y]
   }

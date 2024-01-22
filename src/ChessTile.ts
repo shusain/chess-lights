@@ -7,6 +7,8 @@ export default class ChessTile {
     x: number
     
     isValidPosition: boolean
+    canKingSideCastle: boolean
+    canQueenSideCastle: boolean
 
     prevLight: ChessTile;
     nextLight: ChessTile;

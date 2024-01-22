@@ -3,6 +3,7 @@ import ChessTile from "../ChessTile";
 import ChessPiece from "./ChessPiece";
 
 export default class King extends ChessPiece {
+
   pieceSymbol = () => this.color=="black" ?  "♚" : "♔";
   
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {

@@ -115,17 +115,20 @@ export default class ChessBoard {
       if(willMovePutPlayerIntoCheck) return false
     }
     
+    const isPlayerPieceOnTile = piece => piece != toTile.currentPiece
 
     if(toTile.currentPiece) {
       if(toTile.currentPiece.color=="white")
-      this.players[0].pieces = this.players[0].pieces.filter(piece => piece!= toTile.currentPiece)
+      this.players[0].pieces = this.players[0].pieces.filter(isPlayerPieceOnTile)
       if(toTile.currentPiece.color=="black")
-      this.players[1].pieces = this.players[1].pieces.filter(piece => piece!= toTile.currentPiece)
+      this.players[1].pieces = this.players[1].pieces.filter(isPlayerPieceOnTile)
     }
+
+    // Moves the selected pieces from the from to tile to the to tile
     toTile.currentPiece = fromTile.currentPiece
+    toTile.currentPiece.hasMoved = true
 
     if (toTile.currentPiece instanceof Pawn) {
-      toTile.currentPiece.hasMoved = true
       if(toTile.y == 0 || toTile.y==7) {
         let theNewQueen = new Queen(this.boardTiles, toTile.y, toTile.x, toTile.currentPiece.color)
         this.currentPlayer.pieces.splice(this.currentPlayer.pieces.indexOf(toTile.currentPiece), 1, theNewQueen)
@@ -136,6 +139,16 @@ export default class ChessBoard {
     fromTile.currentPiece = null
     toTile.currentPiece.currentTile = toTile
 
+    if(toTile.currentPiece instanceof King){
+      if(toTile.canKingSideCastle) {
+        const kingSideRook = this.currentPlayer.kingSideRook
+        this.movePiecePosition(kingSideRook.currentTile, {x: toTile.x-1, y: toTile.y})
+      }
+      if(toTile.canQueenSideCastle) {
+        const queenSideRook = this.currentPlayer.queenSideRook
+        this.movePiecePosition(queenSideRook.currentTile, {x: toTile.x+1, y: toTile.y})
+      }
+    }
 
     return true
   }
@@ -182,29 +195,25 @@ export default class ChessBoard {
   setupPiecesOnBoard() {
     // White back row
     let whiteRook1 = new Rook(this.boardTiles, 0, 0)
-    let whiteRook2 = new Rook(this.boardTiles, 0, 7)
-
     let whiteKnight1 = new Knight(this.boardTiles, 0, 1)
-    let whiteKnight2 = new Knight(this.boardTiles, 0, 6)
-
     let whiteBishop1 = new Bishop(this.boardTiles, 0, 2)
-    let whiteBishop2 = new Bishop(this.boardTiles, 0, 5)
-
     let whiteQueen = new Queen(this.boardTiles, 0, 3)
     let whiteKing = new King(this.boardTiles, 0, 4)
+    let whiteBishop2 = new Bishop(this.boardTiles, 0, 5)
+    let whiteKnight2 = new Knight(this.boardTiles, 0, 6)
+    let whiteRook2 = new Rook(this.boardTiles, 0, 7)
+    whiteRook2.kingSideRook = true
 
     // Black back row
     let blackRook1 = new Rook(this.boardTiles, 7, 0, "black")
-    let blackRook2 = new Rook(this.boardTiles, 7, 7, "black")
-
     let blackKnight1 = new Knight(this.boardTiles, 7, 1, "black")
-    let blackKnight2 = new Knight(this.boardTiles, 7, 6, "black")
-
     let blackBishop1 = new Bishop(this.boardTiles, 7, 2, "black")
-    let blackBishop2 = new Bishop(this.boardTiles, 7, 5, "black")
-
     let blackQueen = new Queen(this.boardTiles, 7, 3, "black")
     let blackKing = new King(this.boardTiles, 7, 4, "black")
+    let blackBishop2 = new Bishop(this.boardTiles, 7, 5, "black")
+    let blackKnight2 = new Knight(this.boardTiles, 7, 6, "black")
+    let blackRook2 = new Rook(this.boardTiles, 7, 7, "black")
+    blackRook2.kingSideRook = true
 
     const whitePawns = []
     const blackPawns = []
@@ -231,8 +240,24 @@ export default class ChessBoard {
   }
 
   changeCurrentPlayer() {
+    this.turnOffAllTileLights();
+    this.markAllInvalid();
+    this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
+    console.debug(`checked current player is in check while changing players ${this.currentPlayer}`)
+
     this.currentPlayer = this.currentPlayer === this.players[0] ? this.players[1] : this.players[0];
-    console.log(`Switched players is now ${this.currentPlayer} turn`)
+    console.debug(`Switched players is now ${this.currentPlayer} turn`)
+
+    // Checking if the new player is now in check.
+    this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
+    if(this.currentPlayer.inCheck) {
+      console.debug(`Checking if ${this.currentPlayer.color} in checkmate`)
+      this.currentPlayer.inCheckmate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
+    } else {
+      console.debug(`Checking if ${this.currentPlayer.color} in stalemate`)
+      this.currentPlayer.inStalemate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
+    }
+    console.debug(`done with checks:\n${this.currentPlayer}`)
   }
 
   makeRow(rowNum: number) {
@@ -283,6 +308,44 @@ export default class ChessBoard {
     return !anyMoveGetsKingOutofCheck
   }
 
+  checkIfCastlingPossible(player:Player = this.currentPlayer) {
+    console.log("check for castling")
+
+    // setting both false until check if can castle on either side
+    player.canKingSideCastle = false
+    player.canQueenSideCastle = false
+
+    if(!player.kingHasMoved && !player.kingSideRookHasMoved) {
+
+      const { x:kingX, y:kingY } = player.king.currentTile
+
+      const tileNextTo = this.getTileAtPosition(kingX+1,kingY)
+      const tileTwoOver = this.getTileAtPosition(kingX+2,kingY)
+      
+      if(tileNextTo.currentPiece == null && tileTwoOver.currentPiece == null) {
+        player.canKingSideCastle = true
+        console.log("king side castling possible")
+      }
+
+    }
+
+    if(!player.kingHasMoved && !player.queenSideRookHasMoved) {
+      const { x:kingX, y:kingY } = player.king.currentTile
+
+      const tileNextTo = this.getTileAtPosition(kingX-1,kingY)
+      const tileTwoOver = this.getTileAtPosition(kingX-2,kingY)
+      const tileThreeOver = this.getTileAtPosition(kingX-3,kingY)
+      if(tileNextTo.currentPiece == null && tileTwoOver.currentPiece == null && tileThreeOver.currentPiece == null) {
+        player.canQueenSideCastle = true
+        console.log("queen side castling possible")
+      }
+    }
+  }
+
+  checkIfEnPassantPossible() {
+
+  }
+
 
   clone() {
     const clonedBoard = new ChessBoard('hypothetical-board', false)
@@ -319,36 +382,47 @@ export default class ChessBoard {
   }
 
   tileClickHandler(tile: ChessTile) {
+
+    // Spot is marked valid then try to make the move with current selected piece
     if (tile.isValidPosition) {
+
+      // Try to move the piece, if the piece moves successfully then change players
       if(this.movePiece(this.selectedPiece.currentTile, tile)) {
-        this.turnOffAllTileLights();
-        this.markAllInvalid();
-        this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
-        console.log(`just checked current player is in check ${this.currentPlayer}`)
-        // switching over to other player
         this.changeCurrentPlayer();
-        // Checking if the new player is now in check.
-        this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
-        if(this.currentPlayer.inCheck) {
-          console.log(`Checking if ${this.currentPlayer.color} in checkmate`)
-          this.currentPlayer.inCheckmate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
-        } else {
-          console.log(`Checking if ${this.currentPlayer.color} in stalemate`)
-          this.currentPlayer.inStalemate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
-        }
-        console.log(`done with checks:\n${this.currentPlayer}`)
       }
     }
+    // If we didn't select a valid position to move a piece to check to see if we
+    // selected a new piece
     else {
       this.markAllInvalid();
       let selectedPiece = this.selectPiece(tile.x, tile.y)
+
       let wasOn = tile.isOn;
       this.turnOffAllTileLights();
+      this.checkIfCastlingPossible()
+
 
       if (selectedPiece && selectedPiece.color == this.currentPlayersTurn) {
         tile.isOn = !wasOn
         if (tile.isOn) {
           let validMoves = selectedPiece.findValidMoves(this)
+
+          // King side castling
+          if(selectedPiece instanceof King && this.currentPlayer.canKingSideCastle) {
+            const {x: kingX, y: kingY} = this.currentPlayer.king.currentTile
+            const tileTwoOver = this.getTileAtPosition(kingX+2,kingY)
+            tileTwoOver.canKingSideCastle = true
+
+            validMoves.push(tileTwoOver)
+          }
+          // Queen side castling
+          if(selectedPiece instanceof King && this.currentPlayer.canQueenSideCastle) {
+            const {x: kingX, y: kingY} = this.currentPlayer.king.currentTile
+            const tileTwoOver = this.getTileAtPosition(kingX-2,kingY)
+            tileTwoOver.canQueenSideCastle = true
+
+            validMoves.push(tileTwoOver)
+          }
 
           validMoves.forEach(validMove => {
             // Marking all the valid moves for the selected piece on the board
@@ -377,7 +451,11 @@ export default class ChessBoard {
    * Sets the isOn property to false for all tiles
    */
   turnOffAllTileLights() {
-    this.flatTileList.forEach(light => light.isOn = false)
+    this.flatTileList.forEach(tile => {
+      tile.isOn = false
+      tile.canKingSideCastle = false
+      tile.canQueenSideCastle = false
+    })
   }
 
   

@@ -4,8 +4,6 @@ import ChessPiece from "./ChessPiece";
 
 export default class Pawn extends ChessPiece {
   pieceSymbol = () => this.color=="black" ?  "♟︎" : "♙";
-  
-  public hasMoved:boolean;
 
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {
     const validPositions:Array<{x:number, y:number}> = []

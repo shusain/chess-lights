@@ -3,10 +3,10 @@ import ChessTile from "../ChessTile";
 import ChessPiece from "./ChessPiece";
 
 export default class Rook extends ChessPiece {
+  public kingSideRook: boolean = false;
+
   pieceSymbol = () => this.color=="black" ?  "♜" : "♖";
   
-  hasMoved:boolean;
-
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {
     const validPositions:Array<{x:number, y:number}> = []
     // Destructuring props of this
