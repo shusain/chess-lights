@@ -143,10 +143,12 @@ export default class ChessBoard {
       if(toTile.canKingSideCastle) {
         const kingSideRook = this.currentPlayer.kingSideRook
         this.movePiecePosition(kingSideRook.currentTile, {x: toTile.x-1, y: toTile.y})
+        kingSideRook.hasMoved = true
       }
       if(toTile.canQueenSideCastle) {
         const queenSideRook = this.currentPlayer.queenSideRook
         this.movePiecePosition(queenSideRook.currentTile, {x: toTile.x+1, y: toTile.y})
+        queenSideRook.hasMoved = true
       }
     }
 
@@ -322,7 +324,7 @@ export default class ChessBoard {
       const tileNextTo = this.getTileAtPosition(kingX+1,kingY)
       const tileTwoOver = this.getTileAtPosition(kingX+2,kingY)
       
-      if(tileNextTo.currentPiece == null && tileTwoOver.currentPiece == null) {
+      if(tileNextTo?.currentPiece == null && tileTwoOver?.currentPiece == null) {
         player.canKingSideCastle = true
         console.log("king side castling possible")
       }
@@ -335,7 +337,7 @@ export default class ChessBoard {
       const tileNextTo = this.getTileAtPosition(kingX-1,kingY)
       const tileTwoOver = this.getTileAtPosition(kingX-2,kingY)
       const tileThreeOver = this.getTileAtPosition(kingX-3,kingY)
-      if(tileNextTo.currentPiece == null && tileTwoOver.currentPiece == null && tileThreeOver.currentPiece == null) {
+      if(tileNextTo?.currentPiece == null && tileTwoOver?.currentPiece == null && tileThreeOver?.currentPiece == null) {
         player.canQueenSideCastle = true
         console.log("queen side castling possible")
       }
