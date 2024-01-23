@@ -8,6 +8,7 @@ import King from "./ChessPieces/King";
 import ChessPiece from "./ChessPieces/ChessPiece";
 import Player from "./Player";
 import ILightPattern from "./LightPatterns/ILightPattern";
+import { getFile, getRank } from "./ChessPieces/util";
 
 type BoardPosition = {
   x:number
@@ -501,8 +502,11 @@ export default class ChessBoard {
         if(curTileElm.className != newClassName)
         curTileElm.className = `chess-tile ${onOrOffTile} tile-color-${tile.tileBaseColor}`
   
+
+        let curTileSymbolElm = document.getElementById(`${this.targetElement}-tilesymbol-${tile.id}`)
+
         if (tile.currentPiece) {
-          curTileElm.style.color = tile.currentPiece.color
+          curTileSymbolElm.style.color = tile.currentPiece.color
         }
   
         let displayText = ""
@@ -510,7 +514,7 @@ export default class ChessBoard {
           displayText = tile.currentPiece.pieceSymbol()
         }
   
-        curTileElm.innerHTML = `${displayText}`
+        curTileSymbolElm.innerHTML = `${displayText}`
       })
       this.redraw = false
     }
@@ -538,8 +542,24 @@ export default class ChessBoard {
           let tileDiv = document.createElement('div')
           tileDiv.className = `chess-tile ${tile.id % 2 == 0 ? 'even' : 'odd'}  ${tile.isOn ? 'on' : 'off'} tile-color-${tile.tileBaseColor}`
           tileDiv.id = `${this.targetElement}-tile-${tile.id}`
+          tileDiv.style.position = "relative"
 
           tileDiv.addEventListener('click', () => { this.tileClickHandler(tile) })
+
+          let tileNumDiv = document.createElement('div')
+          tileNumDiv.style.position = "absolute"
+          tileNumDiv.style.top = "4px"
+          tileNumDiv.style.left = "4px"
+          tileNumDiv.style.fontSize = "1rem"
+          tileNumDiv.style.color = "rgba(255,255,255,.5)"
+          tileNumDiv.innerHTML = `${getRank(tile.x)}${getFile(tile.y)}`
+          tileDiv.appendChild(tileNumDiv)
+
+
+          let tileSymbolSpan = document.createElement('span')
+          tileSymbolSpan.id = `${this.targetElement}-tilesymbol-${tile.id}`
+          tileDiv.appendChild(tileSymbolSpan)
+
           return tileDiv
         })
         let rowDiv = document.createElement('div')
