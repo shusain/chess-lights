@@ -3,6 +3,9 @@ import ChessTile from "../ChessTile";
 import ChessPiece from "./ChessPiece";
 
 export default class Bishop extends ChessPiece {
+  get fenType(): string {
+    return 'B'
+  }
   pieceSymbol = () => this.color=="black" ?  "♝" : "♗";
   
   hasMoved:boolean;

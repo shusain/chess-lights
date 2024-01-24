@@ -3,6 +3,9 @@ import ChessTile from "../ChessTile";
 import ChessPiece from "./ChessPiece";
 
 export default class Knight extends ChessPiece {
+  get fenType(): string {
+    return 'N'
+  }
   pieceSymbol = () => this.color=="black" ?  "♞" : "♘";
   
   hasMoved:boolean;

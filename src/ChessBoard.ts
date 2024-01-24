@@ -28,6 +28,16 @@ export default class ChessBoard {
   counter = 0
   selectedPiece: ChessPiece
 
+  //FEN helper props below
+  castlingAvailable = "-"
+  // If an enpassant capture is possible the square to move to for the capture or -
+  enPassantSquare = "-"
+  // Halfmove clock:
+  // Number of halfmoves since the last capture or pawn move. It's used for the fifty-move rule.
+  numberOfHalfMoves = 0
+  // Starts at 1 and is incremented after Black's move.
+  numberOfFullMoves = 1
+
   get currentPlayersTurn(): "white" | "black" {
     return this.currentPlayer.color
   }
@@ -250,6 +260,7 @@ export default class ChessBoard {
 
     this.currentPlayer = this.currentPlayer === this.players[0] ? this.players[1] : this.players[0];
     console.debug(`Switched players is now ${this.currentPlayer} turn`)
+    console.log(this.generateFEN())
 
     // Checking if the new player is now in check.
     this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
@@ -261,6 +272,11 @@ export default class ChessBoard {
       this.currentPlayer.inStalemate = this.cannotMakeAnyMoveWithoutLeavingKingInCheck()
     }
     console.debug(`done with checks:\n${this.currentPlayer}`)
+    if(this.currentPlayer.color === "white") {
+      this.numberOfFullMoves++
+    }
+
+    this.numberOfHalfMoves++
   }
 
   makeRow(rowNum: number) {
@@ -569,5 +585,58 @@ export default class ChessBoard {
       })
     boardRowDOMElms.forEach(boardRowDOMElm => chessBoard.appendChild(boardRowDOMElm))
 
+  }
+
+  generateFEN(): string {
+    let fen = '';
+
+    // Generate piece placement part of FEN
+    for (let rank = 7; rank >= 0; rank--) {
+      let emptySquares = 0;
+
+      for (let file = 0; file < 8; file++) {
+        const tile = this.boardTiles[rank][file];
+
+        if (tile.currentPiece) {
+          if (emptySquares > 0) {
+            fen += emptySquares;
+            emptySquares = 0;
+          }
+
+          // Append piece letter (uppercase for White, lowercase for Black)
+          fen += tile.currentPiece.color === "white" ? tile.currentPiece.fenType.toUpperCase() : tile.currentPiece.fenType.toLowerCase();
+        } else {
+          emptySquares++;
+        }
+      }
+
+      if (emptySquares > 0) {
+        fen += emptySquares;
+      }
+
+      if (rank > 0) {
+        fen += '/';
+      }
+    }
+
+    // Add information about active color, castling, en passant, halfmove clock, and fullmove number
+
+    const fenCurPlayerColor = this.currentPlayer.color === "white" ? "w" : "b"
+
+    const {castlingAvailable, enPassantSquare, numberOfFullMoves, numberOfHalfMoves} = this
+
+    fen += ` ${fenCurPlayerColor} ${castlingAvailable} ${enPassantSquare} ${numberOfHalfMoves} ${numberOfFullMoves}`; // Assuming default values for these fields
+
+    return fen;
+  }
+
+  // Castling availability:
+  // 'K' (or 'k') for kingside castling (short).
+  // 'Q' (or 'q') for queenside castling (long).
+  // '-' if neither side can castle.
+  // example KQkq (all castling possible)
+  // example Kq (castling on white possible on king side, castling possible for black on queen side only
+  getCastlingAvailableFEN() {
+    
   }
 }

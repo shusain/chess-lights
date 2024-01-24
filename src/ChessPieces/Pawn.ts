@@ -3,6 +3,9 @@ import ChessTile from "../ChessTile";
 import ChessPiece from "./ChessPiece";
 
 export default class Pawn extends ChessPiece {
+  get fenType(): string {
+    return 'P'
+  }
   pieceSymbol = () => this.color=="black" ?  "♟︎" : "♙";
 
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {

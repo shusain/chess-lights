@@ -5,6 +5,9 @@ import ChessPiece from "./ChessPiece";
 export default class Rook extends ChessPiece {
   public kingSideRook: boolean = false;
 
+  get fenType(): string {
+    return 'R'
+  }
   pieceSymbol = () => this.color=="black" ?  "♜" : "♖";
   
   findValidMoves(boardState:ChessBoard): Array<{ x: number; y: number; }> {

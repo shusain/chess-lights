@@ -6,6 +6,7 @@ import ChessTile from "../ChessTile";
  */
 export default abstract class ChessPiece {
   abstract pieceSymbol(): string
+  abstract get fenType(): string
   /**
    * 
    * @param boardState The current board state to find valid moves on
