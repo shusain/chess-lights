@@ -10,6 +10,15 @@ After cloning the repo install dependencies (assume using Node v16, `nvm install
 
 `npm install`
 
-Start the local server:
+Start the local FE server:
 
 `npm start`
+
+There is also a Backend for Frontend service that just proxies the calls to OpenAI API so the secret/key for the connection doesn't need
+to live in the client side code/repo.  To run the bff:
+
+```
+cd bff
+npm install
+OPENAI_API_KEY=YOURAPIKEYGOESHERE npm start
+```

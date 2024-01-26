@@ -2,7 +2,8 @@
   "include": ["src/*.ts", "src/ChessPieces/Bishop.ts", "src/ChessPieces/King.ts", "src/ChessPieces/Knight.ts", "src/ChessPieces/Pawn.ts", "src/ChessPieces/Queen.ts", "src/ChessPieces/Rook.ts", "src/ChessPieces/ChessPiece.ts", "src/LightPatterns/ILightPattern.ts", "src/LightPatterns/RowPattern.ts", "src/LightPatterns/SequencePattern.ts", "src/LightPatterns/SnakePattern.ts", "src/LightPatterns/ColumnPattern.ts"],
   "compileOnSave": true,
   "compilerOptions": {
-    "module": "amd",
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
     "target": "es5",
     "sourceMap": true,
     "lib": ["dom", "es2015", "es5", "es6"],

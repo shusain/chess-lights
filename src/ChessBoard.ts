@@ -9,6 +9,7 @@ import ChessPiece from "./ChessPieces/ChessPiece";
 import Player from "./Player";
 import ILightPattern from "./LightPatterns/ILightPattern";
 import { getFile, getRank } from "./ChessPieces/util";
+import OpenAIClient from "./OpenAIClient";
 
 type BoardPosition = {
   x:number
@@ -22,6 +23,10 @@ type BoardPosition = {
  */
 export default class ChessBoard {
   redraw: boolean = true
+
+  openAIClient:OpenAIClient = new OpenAIClient()
+  lastExplanation: string = ""
+
   boardTiles: Array<Array<ChessTile>> = []
   flatTileList: Array<ChessTile> = []
   players: Array<Player> = []
@@ -55,6 +60,32 @@ export default class ChessBoard {
       this.setupPiecesOnBoard()
   }
 
+  /**
+   * 
+   * @param boardPosition a position like "a4"
+   * @returns A ChessTile if one exists at the position or null if the position is out of bounds
+   */
+  getTile(boardPosition: string): ChessTile | null {
+    let file = boardPosition[0]
+    let rank = parseInt(boardPosition[1])
+
+    const fileToX = {
+      a:0,
+      b:1,
+      c:2,
+      d:3,
+      e:4,
+      f:5,
+      g:6,
+      h:7
+    }
+
+    try {
+      return this.boardTiles[rank-1][fileToX[file]];
+    } catch (e) {
+      return null
+    }
+  }
   /**
    * 
    * @param x Horizontal offset from 0 for tile to get (0-7)
@@ -117,7 +148,8 @@ export default class ChessBoard {
     console.log(`moving piece from: ${fromTile}, to: ${toTile} on board: ${this.targetElement}`)
 
     // Cloning the current board so can simulate the move and see if the
-    // current players king is left in check
+    // current players king is left in check, if we are already making a move
+    // on a cloned board we won't do this checking another level deep
     if(withChecking)
     {
       let willMovePutPlayerIntoCheck = this.isPlayerInCheckAfterClonedBoardMove(fromTile, toTile)
@@ -260,7 +292,27 @@ export default class ChessBoard {
 
     this.currentPlayer = this.currentPlayer === this.players[0] ? this.players[1] : this.players[0];
     console.debug(`Switched players is now ${this.currentPlayer} turn`)
-    console.log(this.generateFEN())
+    const fen = this.generateFEN();
+    console.log(fen)
+
+    if(this.currentPlayer.color === "black") {
+      this.openAIClient.getChessMove(fen).then((result) => {
+        let parsedResult = JSON.parse(result)
+        this.lastExplanation = parsedResult.explanation
+
+        const aiSourceTile = this.getTile(parsedResult.from)
+        const aiDestTile = this.getTile(parsedResult.to)
+        if(!aiSourceTile.currentPiece || aiSourceTile.currentPiece.color !== "black") {
+          console.log("invalid move")
+        } else {
+          if(this.movePiece(aiSourceTile, aiDestTile))
+          this.redraw = true
+            this.changeCurrentPlayer()
+        }
+
+        console.log(result)
+      })
+    }
 
     // Checking if the new player is now in check.
     this.currentPlayer.inCheck = this.checkIfPlayerIsInCheck();
@@ -506,6 +558,8 @@ export default class ChessBoard {
 
       if(this.whitePlayer.inStalemate || this.blackPlayer.inStalemate)
         gameStatusText = "Game is in stalemate. GG"
+
+      gameStatusText += this.lastExplanation
 
       document.getElementById('game-status').innerHTML = gameStatusText
 
