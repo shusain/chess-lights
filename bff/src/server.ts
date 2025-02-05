@@ -20,14 +20,17 @@ app.listen(port, () => {
 });
 
 app.post('/get-move', async (req, res) => {
-  console.log('getting move')
   const fen = req.body.fen;
+  console.log(`getting move given fen: ${fen}`)
+
 
   const completion = await openai.chat.completions.create({
-    messages: [{ role: "system", content: `You are an excellent chess player.  You will be playing as the black player and will be given a current board state and asked to make a move.  Consider the curren tboard state before making your move and include an explanation of the thought process and reasoning behind the move then the from and to locations.  For example
+    messages: [{ role: "user", content: `You are an excellent chess player.  You will be playing as the black player and will be given a current board state and asked to make a move.  Consider the curren tboard state before making your move and include an explanation of the thought process and reasoning behind the move then the from and to locations.  For example
 
 Given the board is:
 rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b - - 0 1
+
+Do not include any backticks or extra info in the response outside of the JSON object (it will be parsed with JSON.parse)
 
 You should respond in JSON with something like:
 {
@@ -38,8 +41,8 @@ You should respond in JSON with something like:
   { role: "user", content: `Given the board is:
 ${fen}`}
   ],
-    model: "gpt-4-1106-preview",
-    response_format: { "type": "json_object" }
+    model: "o1-preview",
+    // response_format: { "type": "json_object" }
   });
 
   res.json(completion.choices[0])
